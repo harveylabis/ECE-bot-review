@@ -1,0 +1,5 @@
+# Ignore these file(s)
+credentials.py
+sample.txt
+queLinks.json
+testing.py
