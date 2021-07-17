@@ -1,0 +1,11 @@
+aenum==2.2.6
+attrs==21.2.0
+beautifulsoup4==4.9.3
+certifi==2021.5.30
+charset-normalizer==2.0.3
+fbchat==1.9.7
+idna==3.2
+paho-mqtt==1.5.1
+requests==2.26.0
+soupsieve==2.2.1
+urllib3==1.26.6
