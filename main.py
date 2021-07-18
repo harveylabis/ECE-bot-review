@@ -8,18 +8,17 @@ created: 7/18/2021
 
 import credentials
 import json
-import fbchat
 from fbchat import Client
 from fbchat.models import *
 import fetch_item
 from time import sleep
-import re
+import tracker
 
 # log in details
 username = credentials.getEmail()
 password = credentials.getPassword()
 chatIDs = credentials.getChatID()
-user_agent = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" # old user agent
+user_agent = "Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko" # old user agent works
 # user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36" # new user agent - failed
 
 # cookies stuff here to avoid frequent log in
@@ -42,34 +41,46 @@ if not client.isLoggedIn():
 with open('session.json', 'w') as f:
     json.dump(client.getSession(), f)
 
+# open the counter to know which number to start
+id_counter = tracker.read_counter()
+
 # get questions and answers
-question_count = 1
+question_count = id_counter
 items = fetch_item.get_item(str(question_count))
 
 for item in items:
     topic = item[0]
     question = item[1]
-    choices = item[2]
-    key_ans = item[3]
+    url = item[2]
+    choices = item[3]
+    key_ans = item[4]
 
-    print("Sending quest:", question)
-    client.send(Message(text=topic + "\n" + question), thread_id=chatIDs, thread_type=ThreadType.USER) # send question
-    sleep(3)
+    
+    print("Topic:", topic)
+    print("Sending QUESTION: ", question)
+    client.send(Message(text=topic + "\n\n" + question), thread_id=chatIDs, thread_type=ThreadType.USER) # send question
+    sleep(15) # wait for 15 sec before sending url if present, otherwise, choices
+
+    # sending image url if present
+    if url:
+        client.send(Message(text=url), thread_id=chatIDs, thread_type=ThreadType.USER) # send question
+        sleep(5) # wait for 5 sec before sending choices
 
     for choice in choices:
-        print("Sending choic:", choice)
+        print("Sending CHOICE:       ", choice)
         client.send(Message(text=choice), thread_id=chatIDs, thread_type=ThreadType.USER) # send choices
-        sleep(2)
+        sleep(1) # send choices for evey 1 second interval
 
-    # after 5 sec for testing, send the answer key
-    sleep(5)
+    # after 15 sec for testing, send the answer key
+    sleep(15)
     client.send(Message(text=key_ans), thread_id=chatIDs, thread_type=ThreadType.USER) # send key answer
+    print("Sending KEY ANS:    ", key_ans)
 
-    # wait for 10 seconds for the next question
-    sleep(10)
+    # wait for 5 seconds for the next question
+    sleep(5)
 
-with open('session.json', 'w') as f:
-    json.dump(client.getSession(), f)
+tracker.write_counter(question_count)
+print("The question was sent properly, exiting...")
     
-# client.logout()
+# client.logout() - cause error, better not include
 

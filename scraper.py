@@ -55,7 +55,7 @@ for topic in topics:
                 question_found = True
             
             elif img_found and question_found:
-                url = line.get("href")
+                url = line.get("src")
                 item["url"] = url
 
             elif choi_found and choi_found.span()[0] == 3:

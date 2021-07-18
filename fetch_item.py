@@ -38,11 +38,12 @@ def get_item(id):
             question = contents[id]["question"]
             choices = contents[id]["choices"]
             key_ans = contents[id]["key"]
+            url = contents[id]["url"]
 
-            item = topic, question, choices, key_ans
+            item = topic, question, url, choices, key_ans
         
         id_items.append(item)
 
     return id_items
 
-print(get_item(str(1)))
+# print(get_item(str(1))) -- test
