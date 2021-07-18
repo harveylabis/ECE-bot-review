@@ -1,4 +1,10 @@
-### THIS FILE SCRAPES THE QUESTIONS, CHOICES, ANSWER, AND IMAGE URL (if present) ###
+""" SCRAPES THE QUESTIONS, CHOICES, ANSWER, AND IMAGE URL (if present)
+The questions are from pinoybix.org, a very nice source of review questions.
+One-time use only, just for scraping all the questions in the website.
+
+author: pororomero
+created: 7/28/2021
+"""
 
 from bs4 import BeautifulSoup
 import requests
@@ -20,7 +26,6 @@ topics = [topic for topic in topics_urls]
 for topic in topics:
     filename = topic + ".json"
     que_count = 1
-    links_count = 1
 
     contents = {}
     # loop through urls inside a current topic
@@ -45,7 +50,7 @@ for topic in topics:
             key_found = "Option" in line_str
 
             if que_found:
-                question = line.text # .replace(que_found.group(), "")
+                question = str(que_count) + " " + line.text.replace(que_found.group(), "")
                 item["question"] = question
                 question_found = True
             
@@ -70,6 +75,10 @@ for topic in topics:
                 item["url"] = None
                 item_with_url = False
                 question_found = False
-    print(contents)
+
     with open(filename, 'w', encoding="utf8") as f:
         json.dump(contents, f, indent=2, ensure_ascii=False)
+    
+    # pause for 2 seconds to avoid server issues
+    sleep(2) 
+    
