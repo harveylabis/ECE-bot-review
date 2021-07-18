@@ -8,7 +8,7 @@ from time import sleep
 
 # define the regex patterns
 que_pattern = "[0-9]+\. " # pattern for question
-choi_pattern = "[ABCD]\) |[ABCD]\. " # pattern for choices with letter+parenthesis: pattern 1
+choi_pattern = "[AaBbCcDd]\) |[AaBbCcDd]\. " # pattern for choices with letter+parenthesis: pattern 1
 img_pattern = "(http.+?\.png)|(http.+?\.gif)" # pattern for links of image attached: png
 
 # open the topics
@@ -36,7 +36,7 @@ for topic in topics:
 
         # loop through the lines (view source)
         # <p> - question, choices ; <a> - img link
-        for line in soup:
+        for line in soup.find_all(['p', 'a']):
             line_str = str(line)
 
             que_found = re.search(que_pattern, line_str)
@@ -50,10 +50,10 @@ for topic in topics:
                 question_found = True
             
             elif img_found and question_found:
-                item_with_url = True
-                item["url"] = img_found[0]
+                url = line.get("href")
+                item["url"] = url
 
-            elif choi_found:
+            elif choi_found and choi_found.span()[0] == 3:
                 choice = line.text
                 if ")" in choice:
                     choice = choice.replace(")", ".")
@@ -62,8 +62,6 @@ for topic in topics:
             elif key_found:
                 item["key"] = line.text
                 item["id"] = que_count
-                if not item_with_url:
-                    item["url"] = None
                 contents[que_count] = item.copy()
                 
                 # reset variables
@@ -72,8 +70,6 @@ for topic in topics:
                 item["url"] = None
                 item_with_url = False
                 question_found = False
-
-# MAKE A MODULAR FUNCTION
-
+    print(contents)
     with open(filename, 'w', encoding="utf8") as f:
         json.dump(contents, f, indent=2, ensure_ascii=False)
