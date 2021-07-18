@@ -50,7 +50,7 @@ for topic in topics:
             key_found = "Option" in line_str
 
             if que_found:
-                question = str(que_count) + " " + line.text.replace(que_found.group(), "")
+                question = str(que_count) + ". " + line.text.replace(que_found.group(), "")
                 item["question"] = question
                 question_found = True
             
@@ -66,7 +66,6 @@ for topic in topics:
 
             elif key_found:
                 item["key"] = line.text
-                item["id"] = que_count
                 contents[que_count] = item.copy()
                 
                 # reset variables
