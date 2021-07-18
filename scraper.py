@@ -22,20 +22,58 @@ for topic in topics:
     que_count = 1
     links_count = 1
 
+    contents = {}
     # loop through urls inside a current topic
     for url in topics_urls[topic]["urls"]:
         response = requests.get(url)
         print(response)
         soup = BeautifulSoup(response.content, 'html.parser')
+        
+        item = {}
+        item["choices"] = []
+        item_with_url = False
+        question_found = False
 
         # loop through the lines (view source)
         # <p> - question, choices ; <a> - img link
-        for line in soup.find_all(['p', 'a']): 
-            img_found = re.search(img_pattern, str(line))
-            if re.search(que_pattern, str(line)):
-                print("question:", line.text)
-            elif img_found:
-                print("image:", img_found[0])    
-            elif re.search(choi_pattern, str(line)):
-                print("choice:", line.text)
-    
+        for line in soup:
+            line_str = str(line)
+
+            que_found = re.search(que_pattern, line_str)
+            img_found = re.search(img_pattern, line_str)
+            choi_found = re.search(choi_pattern, line_str)
+            key_found = "Option" in line_str
+
+            if que_found:
+                question = line.text # .replace(que_found.group(), "")
+                item["question"] = question
+                question_found = True
+            
+            elif img_found and question_found:
+                item_with_url = True
+                item["url"] = img_found[0]
+
+            elif choi_found:
+                choice = line.text
+                if ")" in choice:
+                    choice = choice.replace(")", ".")
+                item["choices"].append(choice)
+
+            elif key_found:
+                item["key"] = line.text
+                item["id"] = que_count
+                if not item_with_url:
+                    item["url"] = None
+                contents[que_count] = item.copy()
+                
+                # reset variables
+                item["choices"] = []
+                que_count += 1
+                item["url"] = None
+                item_with_url = False
+                question_found = False
+
+# MAKE A MODULAR FUNCTION
+
+    with open(filename, 'w', encoding="utf8") as f:
+        json.dump(contents, f, indent=2, ensure_ascii=False)
